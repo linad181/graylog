@@ -14,16 +14,7 @@ volumes:
     driver: local
 
 services:
-  # Add Cloudflare tunnel, comment out if not needed
-  # Be sure to add TOKEN
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflare-tunnel
-    restart: unless-stopped
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN=
-  
+
   # Graylog stores configuration in MongoDB
   mongo:
     image: mongo:6.0.5-jammy
@@ -65,9 +56,13 @@ services:
     container_name: graylog
     environment:
       # CHANGE ME (must be at least 16 characters)!
-      GRAYLOG_PASSWORD_SECRET: "somepasswordpepper"
-      # Password: admin
-      GRAYLOG_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+      # Used for Graylog password_secret functions, not for login!
+      GRAYLOG_PASSWORD_SECRET: "ChangeMe"
+      
+      # Hashed password for user "admin"
+      # Generate SHA2 of "admin" password with command: echo -n YourPassword | shasum -a 256
+      GRAYLOG_ROOT_PASSWORD_SHA2: ""
+      
       GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
       GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
@@ -75,17 +70,29 @@ services:
       GRAYLOG_TIMEZONE: "America/Los_Angeles"
       TZ: "America/Los_Angeles"
       GRAYLOG_TRANSPORT_EMAIL_PROTOCOL: "smtp"
-      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL: "http://192.168.3.233:9000/"
+      
+      # Change 'district' to name of School District
+      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL: "https://graylog-district.ncesd.tech/"
+      
       GRAYLOG_TRANSPORT_EMAIL_HOSTNAME: "smtp.office365.com"
       GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
       GRAYLOG_TRANSPORT_EMAIL_PORT: "587"
       GRAYLOG_TRANSPORT_EMAIL_USE_AUTH: "true"
-      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME: "xxxxx"
-      GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD: "xxxxx"
+      
+      # Change username to O365 email address
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME: "graylog@"
+      
+      # Add O365 email password here
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD: ""
+      
       GRAYLOG_TRANSPORT_EMAIL_USE_TLS: "true"
       GRAYLOG_TRANSPORT_EMAIL_USE_SSL: "false"
-      GRAYLOG_TRANSPORT_FROM_EMAIL: "graylog@example.com"
-      GRAYLOG_TRANSPORT_SUBJECT_PREFIX: "[graylog]"
+      
+      # Change username to O365 email address
+      GRAYLOG_TRANSPORT_FROM_EMAIL: "graylog@bsd75.org"
+
+      # Change 'district' to name of School District
+      GRAYLOG_TRANSPORT_SUBJECT_PREFIX: "[graylog-district]"
 
     entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 -- /docker-entrypoint.sh
     volumes:
@@ -101,12 +108,13 @@ services:
         condition: "service_started"
     ports:
       - 9000:9000/tcp   # Graylog web interface and REST API
-      - 514:514/udp     # Cisco Syslog
+      - 514:1516/udp    # Cisco Syslog
       - 1514:1514/tcp   # Syslog
       - 1514:1514/udp   # Syslog
       - 12201:12201/tcp # GELF
       - 12201:12201/udp # GELF
       - 1515:1515/udp   # Synology NAS
+      - 1517:1517/udp   # APC Managment Cards
       - 5044:5044/tcp   # Windows DCs
       - 5045:5045/tcp   # Windows Member Servers
       - 5046:5046/tcp   # Windows Hyper-V Hosts
