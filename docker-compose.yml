@@ -80,7 +80,7 @@ services:
       GRAYLOG_TRANSPORT_EMAIL_USE_AUTH: "true"
       
       # Change username to O365 email address
-      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME: "graylog@"
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME: ""
       
       # Add O365 email password here
       GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD: ""
@@ -89,7 +89,7 @@ services:
       GRAYLOG_TRANSPORT_EMAIL_USE_SSL: "false"
       
       # Change username to O365 email address
-      GRAYLOG_TRANSPORT_FROM_EMAIL: "graylog@bsd75.org"
+      GRAYLOG_TRANSPORT_FROM_EMAIL: ""
 
       # Change 'district' to name of School District
       GRAYLOG_TRANSPORT_SUBJECT_PREFIX: "[graylog-district]"
